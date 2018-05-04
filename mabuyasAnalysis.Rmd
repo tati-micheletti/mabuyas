@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Mabuyas
 
-The present analysis focused on determining the density of mabuyas (*Trachylepis atlantica*) in different habitats on the island of Fernando de Noronha. The `R` package used for the present analysis is the `RMark` and the code is hosted in `github`. This `.rmd` file will guide you on how to reproduce the analysis. Make sure you also have program [Mark](www.mark.org???) and [RStudio](www.rstudio.com) installed in your computer. Mark needs to be installed in the ProgramFiles folder (`C:\ProgramFiles\`).
+The present analysis focused on determining the density of mabuyas (*Trachylepis atlantica*) in different habitats on the island of Fernando de Noronha. The `R` package used for the present analysis is the `RMark` and the code is hosted in `github`. This `.rmd` file will guide you on how to reproduce the analysis. Make sure you also have program [Mark](http://www.phidot.org/software/mark/docs/book/) and [RStudio](www.rstudio.com) installed in your computer. Mark needs to be installed in the ProgramFiles folder (`C:\ProgramFiles\`).
 
 ### Setting a github account and creating your repository for the project
 The first step is to set a github account so you can download the code and we can work on it collaboratively:
@@ -19,7 +19,7 @@ The first step is to set a github account so you can download the code and we ca
 2. In the search bar, look for me `tati-micheletti`. On the left bar my name will be shown under `users`. Click to follow me.
 3. Click on my profile and go to my `repositories`. You will see one that is called `mabuyas`. Click on it.
 4. Now you can see all the files (this guide included!) that are there. There is a little button on the top right that says `fork`. Click on it. This will copy my repository to a repository on your account.
-5. Now we need to install [git](ADD GIT LINK) and [gitkraken](www.gitkraken.com) in your computer. This will allow us to work on your project in a collaborative way.
+5. Now we need to install [git](https://git-scm.com/download/win) and [gitkraken](www.gitkraken.com) in your computer. This will allow us to work on your project in a collaborative way.
 6. Once  both are installed, create an account in gitkraken (you can actually link this to your github account).
 7. Now go back to your github account and click in repositories and in the `mabuya` one. Now we need to get all those files to your computer. Click on the green button that says `clone or download`, and click on the little icon on the right of the link to copy it.
 8. Go back to your gitkraken and click on `File` and `Clone Repo`. Put the url you just copied, define a folder for the project on `Where to clone` and click on `Clone the repo!`.
@@ -31,7 +31,7 @@ The first step is to set a github account so you can download the code and we ca
 
 ### Alternative analysis using `RMark` package in `R` (NOT FINISHED!)
 
-Analysis were performed using the [`Poisson-log normal mark-resight model`](https://MARK_BOOK.pdf). ==> PROVIDE PATH TO R BOOK.
+Analysis were performed using the [`Poisson-log normal mark-resight model`](http://www.phidot.org/software/mark/docs/book/pdf/chap18.pdf).
 
 1. Install and load the libraries:
 
@@ -43,7 +43,7 @@ library("RMark")
 ## Create your data.frame
 
 2. Create a data.frame in R from `excel` to be analysed by Mark:
-```{r}
+```{r data}
 mabuya.df <- 
 ```
 
