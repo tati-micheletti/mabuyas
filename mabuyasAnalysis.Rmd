@@ -2,7 +2,11 @@
 title: "Capture-Mark-Resight Mabuias"
 author: "Tati Micheletti"
 date: "1 May 2018"
-output: html_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes: \usepackage{color}
 ---
 
 ```{r setup, include=FALSE}
@@ -11,49 +15,223 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Mabuyas
 
-The present analysis focused on determining the density of mabuyas (*Trachylepis atlantica*) in different habitats on the island of Fernando de Noronha. The `R` package used for the present analysis is the `RMark` and the code is hosted in `github`. This `.rmd` file will guide you on how to reproduce the analysis. Make sure you also have program [Mark](http://www.phidot.org/software/mark/docs/book/) and [RStudio](www.rstudio.com) installed in your computer. Mark needs to be installed in the ProgramFiles folder (`C:\ProgramFiles\`).
+The present analysis focused on determining the density of mabuyas (*Trachylepis atlantica*) in different habitats on the island of Fernando de Noronha. The `R` package used for the present analysis is the `RMark` and the code is hosted in `github` (https://github.com/tati-micheletti/mabuyas). This `.rmd` file will guide you on how to reproduce the analysis. Make sure you also have program [Mark](http://www.phidot.org/software/mark/docs/book/) and [RStudio](www.rstudio.com) installed in your computer. Mark needs to be installed in the ProgramFiles folder (`C:\ProgramFiles\`).
 
-### Setting a github account and creating your repository for the project
-The first step is to set a github account so you can download the code and we can work on it collaboratively:
-1. Go to [github website](www.github.com), and sign up for an account.
-2. In the search bar, look for me `tati-micheletti`. On the left bar my name will be shown under `users`. Click to follow me.
-3. Click on my profile and go to my `repositories`. You will see one that is called `mabuyas`. Click on it.
-4. Now you can see all the files (this guide included!) that are there. There is a little button on the top right that says `fork`. Click on it. This will copy my repository to a repository on your account.
-5. Now we need to install [git](https://git-scm.com/download/win) and [gitkraken](www.gitkraken.com) in your computer. This will allow us to work on your project in a collaborative way.
-6. Once  both are installed, create an account in gitkraken (you can actually link this to your github account).
-7. Now go back to your github account and click in repositories and in the `mabuya` one. Now we need to get all those files to your computer. Click on the green button that says `clone or download`, and click on the little icon on the right of the link to copy it.
-8. Go back to your gitkraken and click on `File` and `Clone Repo`. Put the url you just copied, define a folder for the project on `Where to clone` and click on `Clone the repo!`.
-9. Now you are set to start working on your project.
+### Getting your project
+1. Go to [\textcolor{red}{github website}](https://github.com/tati-micheletti/mabuyas).
+2. Click on the blue button that says `clone or download`, and click on the `download ZIP` to download the folder.
+3. Now you are set to start working on your project, so open the file `mabuyas.Rproj` in `RStudio`. 
+4. Now, on the lower-right pannel, click on the file mabuyasAnalysisDirectDownload.Rmd and you will open this source file.
+5. Run all code chuncks below by pressing `Ctrl + Alt + R` or clicking in `Run` and `Run All` in the tab above.
 
-### Analysis using `Mark` program:
-1. Create the file `.inp` with observations (created for you in folder data): `secondAnalysis.inp`. This file contains information on capture history, groups, number of individuals marked, number of unmarked individuals that were observed, and number of individuals that are marked and you can identify individually. The file also has infomation on the effort spent in each occasion. 
-2. 
-
-### Alternative analysis using `RMark` package in `R` (NOT FINISHED!)
-
+### Description of analysis using `RMark` package in `R`
+\
 Analysis were performed using the [`Poisson-log normal mark-resight model`](http://www.phidot.org/software/mark/docs/book/pdf/chap18.pdf).
 
 1. Install and load the libraries:
 
 ```{r load libraries}
-install.packages("RMark")
-library("RMark")
+suppressWarnings(library("RMark"))
+suppressWarnings(library("xlsx"))
+suppressWarnings(library("reproducible"))
 ```
 
-## Create your data.frame
+If you don't have the libraries above, install and run them again:
+
+```{r install libs, eval = FALSE}
+install.packages("RMark")
+install.packages("xlsx")
+install.packages("reproducible")
+```
+
+
+## Create your data.frame and variables
+
+First of all, to analyse your data, you need to bring it to `R`.
 
 2. Create a data.frame in R from `excel` to be analysed by Mark:
 ```{r data}
-mabuya.df <- 
+directory <- getwd()
+ch <- read.xlsx(file = file.path(getwd(), "data/dataMabuya.xlsx"), 
+                       header = TRUE, 
+                       sheetName = "ch", 
+                       as.data.frame = TRUE)
+ch$ch <- as.character(ch$ch) # Convert factor to character
+
+covars <- read.xlsx(file = file.path(getwd(), "data/dataMabuya.xlsx"), 
+                       header = TRUE, 
+                       sheetName = "covars", 
+                       as.data.frame = TRUE)
 ```
 
+3. Create the variables you will need for the model(s) in form of a vector or matrix from your datasets:
+```{r variables}
+nocc <- 6 # Number of occasions
+groupsNames <- unique(covars$colonies) # Names of groups
+nGroups <- length(groupsNames) # Number of groups
 
-## Defining parameters and model
-
-3. Define parameter and the model you want to use
-```{r load data}
-mabuya.process <- process.data(mabuya.df,model="Poisson-log normal mark-resight model", time.intervals=c(1,1,1,1,1), groups="colonies")
+unmarkedSeen <- matrix(covars[, "unmarkedSeen"], 
+                       nrow = nGroups, 
+                       ncol = nocc, 
+                       byrow = TRUE) # counts of unmarked individuals seen
+markedUnidentified <- matrix(covars[, "markedUnidentified"], 
+                             nrow = nGroups, 
+                             ncol = nocc, 
+                             byrow = TRUE) # counts of marked individuals unidentified
+knownMarks <- matrix(covars[, "knownMarks"], 
+                     nrow = nGroups, 
+                     ncol = nocc, 
+                     byrow = TRUE) # counts of known marked individuals
+effort <- matrix(covars[, "effort"], 
+                 nrow = nGroups, 
+                 ncol = nocc, 
+                 byrow = TRUE) # effort of observation in each colony at each time
 ```
 
+Now you have all the basic data to run your models. But first, you need the models.
 
+## Defining your model(s)
 
+To define your models, you have to think of which variables will influence your parameters. For example: different effort in each occasion will influence the probability of observing individuals ($\alpha$), so $\alpha$ could vary in function of effort or even, both effort and colony ('colonies') depending if you think that it is harder or easier to observe the individuals in different places. We can also come up with extra categories related to disturbance level (i.e. capim-açu is less disturbed than boldro), for example. Here I ran only one model so far, but you should later work on more models and we can develop a comparison test. :)
+
+Basically you have to give a formula to each variable. for example: the basic formula `formula = ~1` means that the parameter that this formula is assigned to is constant. We can also make this parameter vary with `effort` (`formula = ~ effort`) or even to `effort` and `colonies` as suggested before (`formula = ~ effort + colonies`). Within a model formula you can also set parameters to fixed values. For example, we know that no mabuyas died within a week of work, so we can set survival (`Phi`) to `1`. We do that by using the constant formula and adding the argument `fixed = 1` (`formula = ~ 1, fixed = 1`). It is also important that all models are in a `list()`. All parameters are descibed below in section *6. Make a data design*.  
+
+4. Defining the model
+```{r models}
+alpha.effort <- list(formula = ~ effort)
+Phi <- list(formula = ~ 1, fixed = 1)
+U <- list(formula = ~ colonies) 
+constant <- list(formula = ~ 1) # Here I create a generic constant 
+                                # model to be used to terms that I need
+zero <- list(formula = ~ 1, fixed = 0) # Here I create a generic zero 
+                                       # model to be used to terms that I need
+```
+
+## Process your data to make it ready for the analysis
+
+To have the data ready **with** the covariates you want to consider (i.e. `effort`), you need to go through 2 steps before running your model:  
+\textcolor{blue}{1. Process your data}: use the function `process.data()`  
+\textcolor{blue}{2. Make a data design}: use the function `make.design.data()`  
+
+5. Process your data
+```{r process data}
+mabuya.process <- process.data(ch,
+                               model = "PoissonMR", 
+                               time.intervals = rep(1, times = (nocc-1)),
+                               groups = "colonies",
+                               counts = list("Unmarked Seen" = unmarkedSeen,
+                                             "Marked Unidentified" = markedUnidentified,
+                                             "Known Marks" = knownMarks))
+mabuya.process
+```
+
+Now you can see a list that summarizes your data. You can see the variables by typing `names(mabuya.process)`:  
+
+```{r names mabuya.process}
+names(mabuya.process)
+```
+
+And you can access these elements by typing `mabuya.process$ELEMENT_NAME`.
+
+6. Make a data design:
+
+Now you need to make a data design that will identify the parameters in your data that are constant, and the variable ones for each model term, as well as set your covariates where they should be placed in:  
+
+```{r data design}
+mabuya.ddl <- make.design.data(mabuya.process)
+```
+
+Using the `names(mabuya.ddl)` you can check now your parameters. 
+```{r names ddl}
+names(mabuya.ddl)
+```
+
+The *\textcolor{red}{Poisson-log normal mark-resight model}*, has have *four* main parameters:
+
+\textcolor{blue}{U[j]} (`U`) = number of unmarked individuals in the population during primary interval j.  
+\textcolor{blue}{$\alpha[j]$} (`alpha`) = intercept (on log scale) for mean resighting rate during primary interval j. If there is no individual heterogeneity ($\sigma[j]$ = 0), once back-transformed from the log scale the real parameter estimate can be interpreted as the mean resighting rate for the entire population.  
+\textcolor{blue}{$\varphi[j]$} (`Phi`) = apparent survival between primary intervals j and j + 1.  
+\textcolor{blue}{$\sigma^2[j]$} (`sigma`) = individual heterogeneity level (on the log scale) during primary interval j, i.e., the additional variance due to a random individual heterogeneity effect with mean zero.  
+
+Now we can check one of the parameters: `alpha`:
+```{r alpha}
+mabuya.ddl$alpha
+```
+
+Now you can include the covariates (such as effort and/or disturbance level) with the following code:
+```{r add covariates}
+mabuya.ddl$alpha$effort <- as.numeric(apply(X = mabuya.ddl$alpha, 1, function(x){
+    col <- x[["group"]]
+    occ <- as.numeric(x[["time"]])
+    eff <- covars[covars$colonies==col&covars$occasion==occ, "effort"]
+  })
+)
+```
+
+And now we check again to see how this changed our `data.frame`:
+```{r alpha2}
+mabuya.ddl$alpha
+```
+
+Here, we added effort to alpha (which is the mean resighting rate during primary interval), as more effort increases the chances of observing an individual and the effort varied on occasions and colonies.
+
+Now we are ready to run the model(s).
+
+## Running the analysis
+
+7. Model coding
+```{r run_model}
+setwd(dir = file.path(getwd(), "outputs")) # Changing directory for outputs
+mabuya.model <- mark(data = mabuya.process,      # Here we use the processed data 
+                     ddl = mabuya.ddl,           # Here we use the designed data 
+                     model.parameters = list(    # Here are the parameters's   
+                             alpha = alpha.effort, # models set on step 4.
+                             Phi = Phi,
+                             U = U,
+                             sigma = zero,
+                             GammaDoublePrime = constant,
+                             GammaPrime = constant
+                     )
+                 )
+setwd(dir = directory) # Changing directory back to original
+```
+
+## Interpreting the results
+
+Now, it is important to notice that the `U` the model outputs is `NOT` the  `population size`. The last, as well as other parameters can, however be derived:  
+
+*Derived Parameters*
+
+\textcolor{blue}{$\lambda[j]$} = overall mean resighting rate for primary occasion j. This is a parameter derived as a function of $\alpha[j]$, $\sigma^2[j]$ and and E[j]. Note that when $\sigma[j]$ = 0 and E[j] = 0, then the real parameter estimate for $\alpha[j]$ is identical to the derived parameter estimate for $\lambda[j]$.
+
+\textcolor{blue}{N[j]} = U[j] + n[j], or the total population size during primary occasion j. This is a derived parameter, because MARK actually estimates U[j] in the model. n[j] is the marked population.
+  
+8. Calculating derived parameters
+
+RMark automatically calculates the `population size` for each group (and occasion when we do a long term study with longer interval time).
+```{r derived}
+mabuya.model$results$derived$`N Population Size`
+```
+
+You will notice, however, that it doesn't output the location's names. We can, however retrieve it from the original data, and clean it up (repetitions):
+
+```{r derived Final}
+populationSize <- cbind(covars$colonies, mabuya.model$results$derived$`N Population Size`) %>%
+  unique()
+populationSize <-  populationSize[populationSize$se > 0,]
+```
+
+Now we can also calculate the densities among the areas (and at some point compare them statistically):
+```{r density}
+populationSize$areaSize <- c(36.7, 44.92, 7.7,
+                             3.5, 15, 52, 48, 30)
+density <- populationSize$estimate/populationSize$areaSize
+populationSize <- cbind(populationSize, density)
+colnames(populationSize) <- c("location", "estimate", "standard.error",
+                           "lowerCI", "upperCI", "areaSize", "density")
+```
+
+And here we see the final result of the population size:
+```{r final, echo = FALSE}
+knitr::kable(populationSize, digits = 2, align = "c", format = "pandoc", row.names = FALSE)
+```

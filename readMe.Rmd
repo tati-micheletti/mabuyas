@@ -5,28 +5,14 @@ date: "1 May 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Mabuyas
 
-The present analysis focused on determining the density of mabuyas (*Trachylepis atlantica*) in different habitats on the island of Fernando de Noronha. The `R` package used for the present analysis is the `secr`. Analysis were performed based on [secr documentation for R](https://www.otago.ac.nz/density/pdfs/secr-markresight.pdf).
+The present analysis focused on determining the density of mabuyas (*Trachylepis atlantica*) in different habitats on the island of Fernando de Noronha. The `R` package used for the present analysis is the `RMark` and the code is hosted in `github` (https://github.com/tati-micheletti/mabuyas). This `.rmd` file will guide you on how to reproduce the analysis. Make sure you also have program [Mark](http://www.phidot.org/software/mark/docs/book/) and [RStudio](www.rstudio.com) installed in your computer. Mark needs to be installed in the ProgramFiles folder (`C:\ProgramFiles\`).
 
-```{r load libraries}
-install.packages("secr")
-require("secr")
-```
+### Getting your project
+1. Go to [github website](https://github.com/tati-micheletti/mabuyas).
+2. Click on the green button that says `clone or download`, and click on the `download ZIP` to download the folder.
+3. Now you are set to start working on your project, so open the file `mabuyas.Rproj` in `RStudio`. 
+4. Now, on the lower-right pannel, click on the file mabuyasAnalysis.Rmd and you will open this source file.
+5. Run all code chuncks below by pressing `Ctrl + Alt + R` or clicking in `Run` and `Run All` in the tab above.
 
-## Defining the model
-
-According to Table 1 (secr 3.1), the model to be used is Model 1 (Capture-mark-resight (1,. . . ,0), with All ID, without correction). First, we convert the original data into a `capthist` format for the analysis. The first thing is to define the `markocc`(mark occasions). When marking occasion occured, we give it value 1. If occasion only relates to resighting, we give it a 0. Information on data input can be found [here](https://www.otago.ac.nz/density/pdfs/secr-datainput.pdf)
-
-```{r load data}
-
-mark.occ <- 1 # Occasion of marking
-sight.occ <- 5 # Number of sighting occasions
-markocc(traps) <- c(mark.occ, sight.occ)
-
-
-```
