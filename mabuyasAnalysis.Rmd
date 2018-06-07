@@ -223,8 +223,9 @@ populationSize <-  populationSize[populationSize$se > 0,]
 
 Now we can also calculate the densities among the areas (and at some point compare them statistically):
 ```{r density}
-populationSize$areaSize <- c(36.7, 44.92, 7.7,
-                             3.5, 15, 52, 48, 30)
+populationSize$areaSize <- c(15, 52, 36.7, 
+                             48, 30, 13.5, 
+                             44.9, 7.7)
 density <- populationSize$estimate/populationSize$areaSize
 populationSize <- cbind(populationSize, density)
 colnames(populationSize) <- c("location", "estimate", "standard.error",
